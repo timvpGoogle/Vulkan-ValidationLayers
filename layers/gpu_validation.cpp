@@ -1171,7 +1171,11 @@ bool GpuAssisted::InstrumentShader(const VkShaderModuleCreateInfo *pCreateInfo, 
     // Use the unique_shader_module_id as a shader ID so we can look up its handle later in the shader_map.
     // If descriptor indexing is enabled, enable length checks and updated descriptor checks
     using namespace spvtools;
-    spv_target_env target_env = SPV_ENV_VULKAN_1_1;
+    spv_target_env target_env;
+    if (api_version >= VK_API_VERSION_1_2)
+        target_env = SPV_ENV_VULKAN_1_2;
+    else
+        target_env = SPV_ENV_VULKAN_1_1;
     Optimizer optimizer(target_env);
     optimizer.RegisterPass(
         CreateInstBindlessCheckPass(desc_set_bind_index, unique_shader_module_id, descriptor_indexing, descriptor_indexing));
