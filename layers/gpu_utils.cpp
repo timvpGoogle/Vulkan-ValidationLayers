@@ -323,6 +323,12 @@ void UtilGenerateStageMessage(const uint32_t *debug_record, std::string &msg) {
             strm << "Stage = Callable.  Global Launch ID (x,y,z) = (" << debug_record[kInstRayTracingOutLaunchIdX] << ", "
                  << debug_record[kInstRayTracingOutLaunchIdY] << ", " << debug_record[kInstRayTracingOutLaunchIdZ] << "). ";
         } break;
+        case spv::ExecutionModelTaskNV: {
+            strm << "Stage = Task.";
+        } break;
+        case spv::ExecutionModelMeshNV: {
+            strm << "Stage = Mesh.";
+        } break;
         default: {
             strm << "Internal Error (unexpected stage = " << debug_record[kInstCommonOutStageIdx] << "). ";
             assert(false);

@@ -87,7 +87,9 @@ void DebugPrintf::PostCallRecordCreateDevice(VkPhysicalDevice physicalDevice, co
 
     std::vector<VkDescriptorSetLayoutBinding> bindings;
     VkDescriptorSetLayoutBinding binding = {3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1,
-                                            VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_COMPUTE_BIT | kShaderStageAllRayTracing,
+                                            VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_MESH_BIT_NV |
+                                                VK_SHADER_STAGE_TASK_BIT_NV | VK_SHADER_STAGE_COMPUTE_BIT |
+                                                kShaderStageAllRayTracing,
                                             NULL};
     bindings.push_back(binding);
     UtilPostCallRecordCreateDevice(pCreateInfo, bindings, device_debug_printf, device_debug_printf->phys_dev_props);
@@ -269,6 +271,11 @@ bool DebugPrintf::InstrumentShader(const VkShaderModuleCreateInfo *pCreateInfo, 
         target_env = SPV_ENV_VULKAN_1_1;
     Optimizer optimizer(target_env);
     optimizer.RegisterPass(CreateInstDebugPrintfPass(desc_set_bind_index, unique_shader_module_id));
+    if (device_extensions.vk_nv_mesh_shader) {
+        // WORKAROUND for driver access violation in CreateGraphicsPipelines
+        optimizer.RegisterPass(CreateInlineExhaustivePass());
+        optimizer.RegisterPass(CreateEliminateDeadFunctionsPass());
+    }
     bool pass = optimizer.Run(new_pgm.data(), new_pgm.size(), &new_pgm);
     if (!pass) {
         ReportSetupProblem(device, "Failure to instrument shader.  Proceeding with non-instrumented shader.");
