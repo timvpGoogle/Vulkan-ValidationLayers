@@ -44,6 +44,7 @@ struct DrawDispatchVuid {
     const char* sample_location;
     const char* linear_sampler;
     const char* cubic_sampler;
+    const char* corner_sampled_address_mode;
 };
 
 typedef struct {
