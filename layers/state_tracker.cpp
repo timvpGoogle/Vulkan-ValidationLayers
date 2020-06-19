@@ -4353,10 +4353,10 @@ void ValidationStateTracker::PostCallRecordQueuePresentKHR(VkQueue queue, const 
         // Mark the image as having been released to the WSI
         auto swapchain_data = GetSwapchainState(pPresentInfo->pSwapchains[i]);
         if (swapchain_data && (swapchain_data->images.size() > pPresentInfo->pImageIndices[i])) {
+            swapchain_data->images[pPresentInfo->pImageIndices[i]].acquired = false;
             auto image = swapchain_data->images[pPresentInfo->pImageIndices[i]].image;
             auto image_state = GetImageState(image);
             if (image_state) {
-                image_state->acquired = false;
                 if (image_state->shared_presentable) {
                     image_state->layout_locked = true;
                 }
@@ -4401,10 +4401,10 @@ void ValidationStateTracker::RecordAcquireNextImageState(VkDevice device, VkSwap
     // Mark the image as acquired.
     auto swapchain_data = GetSwapchainState(swapchain);
     if (swapchain_data && (swapchain_data->images.size() > *pImageIndex)) {
+        swapchain_data->images[*pImageIndex].acquired = true;
         auto image = swapchain_data->images[*pImageIndex].image;
         auto image_state = GetImageState(image);
         if (image_state) {
-            image_state->acquired = true;
             image_state->shared_presentable = swapchain_data->shared_presentable;
         }
     }
@@ -5343,12 +5343,13 @@ void ValidationStateTracker::PostCallRecordGetSwapchainImagesKHR(VkDevice device
 
             imageMap[pSwapchainImages[i]] = std::make_shared<IMAGE_STATE>(pSwapchainImages[i], &image_ci);
             auto &image_state = imageMap[pSwapchainImages[i]];
-            image_state->valid = false;
             image_state->create_from_swapchain = swapchain;
             image_state->bind_swapchain = swapchain;
             image_state->bind_swapchain_imageIndex = i;
             image_state->is_swapchain_image = true;
             swapchain_state->images[i].image = pSwapchainImages[i];
+            swapchain_state->images[i].valid = false;
+            swapchain_state->images[i].acquired = false;
             swapchain_state->images[i].bound_images.emplace(pSwapchainImages[i]);
 
             AddImageStateProps(*image_state, device, physical_device);

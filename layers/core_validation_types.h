@@ -379,8 +379,6 @@ class IMAGE_STATE : public BINDABLE {
     VkImage image;
     safe_VkImageCreateInfo safe_create_info;
     VkImageCreateInfo &createInfo;
-    bool valid;               // If this is a swapchain image backing memory track valid here as it doesn't have DEVICE_MEMORY_STATE
-    bool acquired;            // If this is a swapchain image, has it been acquired by the app.
     bool shared_presentable;  // True for a front-buffered swapchain image
     bool layout_locked;       // A front-buffered image that has been presented can never have layout transitioned
     bool get_sparse_reqs_called;         // Track if GetImageSparseMemoryRequirements() has been called for this image
@@ -510,6 +508,8 @@ class ACCELERATION_STRUCTURE_STATE : public BINDABLE {
 
 struct SWAPCHAIN_IMAGE {
     VkImage image;
+    bool valid;    // If this is a swapchain image backing memory track valid here as it doesn't have DEVICE_MEMORY_STATE
+    bool acquired; // If this is a swapchain image, has it been acquired by the app.
     std::unordered_set<VkImage> bound_images;
 };
 

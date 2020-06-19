@@ -67,8 +67,6 @@ IMAGE_STATE::IMAGE_STATE(VkImage img, const VkImageCreateInfo *pCreateInfo)
     : image(img),
       safe_create_info(pCreateInfo),
       createInfo(*safe_create_info.ptr()),
-      valid(false),
-      acquired(false),
       shared_presentable(false),
       layout_locked(false),
       get_sparse_reqs_called(false),

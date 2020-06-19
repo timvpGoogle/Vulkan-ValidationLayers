@@ -10986,9 +10986,8 @@ bool CoreChecks::PreCallValidateQueuePresentKHR(VkQueue queue, const VkPresentIn
                              pPresentInfo->pImageIndices[i], (uint32_t)swapchain_data->images.size());
             } else {
                 auto image = swapchain_data->images[pPresentInfo->pImageIndices[i]].image;
-                const auto image_state = GetImageState(image);
 
-                if (!image_state->acquired) {
+                if (!swapchain_data->images[pPresentInfo->pImageIndices[i]].acquired) {
                     skip |= LogError(pPresentInfo->pSwapchains[i], kVUID_Core_DrawState_SwapchainImageNotAcquired,
                                      "vkQueuePresentKHR: Swapchain image index %u has not been acquired.",
                                      pPresentInfo->pImageIndices[i]);
@@ -11130,7 +11129,7 @@ bool CoreChecks::ValidateAcquireNextImage(VkDevice device, const CommandVersion 
         if (physical_device_state->vkGetPhysicalDeviceSurfaceCapabilitiesKHR_called) {
             const uint32_t acquired_images =
                 static_cast<uint32_t>(std::count_if(swapchain_data->images.begin(), swapchain_data->images.end(),
-                                                    [=](SWAPCHAIN_IMAGE image) { return GetImageState(image.image)->acquired; }));
+                                                    [=](SWAPCHAIN_IMAGE image) { return image.acquired; }));
             const uint32_t swapchain_image_count = static_cast<uint32_t>(swapchain_data->images.size());
             const auto min_image_count = physical_device_state->surfaceCapabilities.minImageCount;
             const bool too_many_already_acquired = acquired_images > swapchain_image_count - min_image_count;
