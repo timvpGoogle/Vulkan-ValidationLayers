@@ -5490,7 +5490,15 @@ TEST_F(VkLayerTest, ExclusiveScissorNV) {
 
 TEST_F(VkLayerTest, MeshShaderNV) {
     TEST_DESCRIPTION("Test VK_NV_mesh_shader.");
+    SetTargetApiVersion(VK_API_VERSION_1_1);
+    VkValidationFeatureEnableEXT enables[] = {VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT};
+    VkValidationFeaturesEXT features = {};
+    features.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+    features.enabledValidationFeatureCount = 1;
+    features.disabledValidationFeatureCount = 0;
+    features.pEnabledValidationFeatures = enables;
 
+    m_device_extension_names.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
     if (InstanceExtensionSupported(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME)) {
         m_instance_extension_names.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
     } else {
@@ -5498,7 +5506,12 @@ TEST_F(VkLayerTest, MeshShaderNV) {
                VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
         return;
     }
-    ASSERT_NO_FATAL_FAILURE(InitFramework(m_errorMonitor));
+    ASSERT_NO_FATAL_FAILURE(InitFramework(m_errorMonitor, &features));
+    if (!DeviceExtensionSupported(gpu(), nullptr, VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME)) {
+        printf("%s Extension %s not supported, skipping this pass. \n", kSkipPrefix,
+               VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
+        return;
+    }
     std::array<const char *, 1> required_device_extensions = {{VK_NV_MESH_SHADER_EXTENSION_NAME}};
     for (auto device_extension : required_device_extensions) {
         if (DeviceExtensionSupported(gpu(), nullptr, device_extension)) {
@@ -5541,11 +5554,13 @@ TEST_F(VkLayerTest, MeshShaderNV) {
     static const char meshShaderText[] =
         "#version 450\n"
         "#extension GL_NV_mesh_shader : require\n"
+        "#extension GL_EXT_debug_printf : enable\n"
         "layout(local_size_x = 1) in;\n"
         "layout(max_vertices = 3) out;\n"
         "layout(max_primitives = 1) out;\n"
         "layout(triangles) out;\n"
         "void main() {\n"
+        "      debugPrintfEXT(\"Here are two float values %f, %f\", 1.0, 2.0);\n"
         "      gl_MeshVerticesNV[0].gl_Position = vec4(-1.0, -1.0, 0, 1);\n"
         "      gl_MeshVerticesNV[1].gl_Position = vec4( 1.0, -1.0, 0, 1);\n"
         "      gl_MeshVerticesNV[2].gl_Position = vec4( 0.0,  1.0, 0, 1);\n"
@@ -5555,7 +5570,7 @@ TEST_F(VkLayerTest, MeshShaderNV) {
         "      gl_PrimitiveCountNV = 1;\n"
         "}\n";
 
-    VkShaderObj vs(m_device, vertShaderText, VK_SHADER_STAGE_VERTEX_BIT, this);
+    // VkShaderObj vs(m_device, vertShaderText, VK_SHADER_STAGE_VERTEX_BIT, this);
     VkShaderObj ms(m_device, meshShaderText, VK_SHADER_STAGE_MESH_BIT_NV, this);
     VkShaderObj fs(m_device, bindStateFragShaderText, VK_SHADER_STAGE_FRAGMENT_BIT, this);
 
@@ -5563,47 +5578,11 @@ TEST_F(VkLayerTest, MeshShaderNV) {
     {
         // can't mix mesh with vertex
         const auto break_vp = [&](CreatePipelineHelper &helper) {
-            helper.shader_stages_ = {vs.GetStageCreateInfo(), fs.GetStageCreateInfo(), ms.GetStageCreateInfo()};
+            // helper.shader_stages_ = {vs.GetStageCreateInfo(), fs.GetStageCreateInfo(), ms.GetStageCreateInfo()};
+            helper.shader_stages_ = {fs.GetStageCreateInfo(), ms.GetStageCreateInfo()};
         };
-        CreatePipelineHelper::OneshotTest(*this, break_vp, kErrorBit,
-                                          vector<std::string>({"VUID-VkGraphicsPipelineCreateInfo-pStages-02095"}));
-
-        // vertex or mesh must be present
-        const auto break_vp2 = [&](CreatePipelineHelper &helper) { helper.shader_stages_ = {fs.GetStageCreateInfo()}; };
-        CreatePipelineHelper::OneshotTest(*this, break_vp2, kErrorBit,
-                                          vector<std::string>({"VUID-VkGraphicsPipelineCreateInfo-stage-02096"}));
-
-        // vertexinput and inputassembly must be valid when vertex stage is present
-        const auto break_vp3 = [&](CreatePipelineHelper &helper) {
-            helper.shader_stages_ = {vs.GetStageCreateInfo(), fs.GetStageCreateInfo()};
-            helper.gp_ci_.pVertexInputState = nullptr;
-            helper.gp_ci_.pInputAssemblyState = nullptr;
-        };
-        CreatePipelineHelper::OneshotTest(*this, break_vp3, kErrorBit,
-                                          vector<std::string>({"VUID-VkGraphicsPipelineCreateInfo-pStages-02097",
-                                                               "VUID-VkGraphicsPipelineCreateInfo-pStages-02098"}));
+        CreatePipelineHelper::OneshotTest(*this, break_vp, kErrorBit, vector<std::string>({"Here are two float values"}));
     }
-
-    PFN_vkCmdDrawMeshTasksIndirectNV vkCmdDrawMeshTasksIndirectNV =
-        (PFN_vkCmdDrawMeshTasksIndirectNV)vk::GetInstanceProcAddr(instance(), "vkCmdDrawMeshTasksIndirectNV");
-
-    VkBufferCreateInfo buffer_create_info = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
-    buffer_create_info.size = sizeof(uint32_t);
-    buffer_create_info.usage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
-    VkBuffer buffer;
-    VkResult result = vk::CreateBuffer(m_device->device(), &buffer_create_info, nullptr, &buffer);
-    ASSERT_VK_SUCCESS(result);
-
-    m_commandBuffer->begin();
-
-    m_errorMonitor->SetDesiredFailureMsg(kErrorBit, "VUID-vkCmdDrawMeshTasksIndirectNV-drawCount-02146");
-    m_errorMonitor->SetDesiredFailureMsg(kErrorBit, "VUID-vkCmdDrawMeshTasksIndirectNV-drawCount-02718");
-    vkCmdDrawMeshTasksIndirectNV(m_commandBuffer->handle(), buffer, 0, 2, 0);
-    m_errorMonitor->VerifyFound();
-
-    m_commandBuffer->end();
-
-    vk::DestroyBuffer(m_device->device(), buffer, 0);
 }
 
 TEST_F(VkLayerTest, MeshShaderDisabledNV) {
