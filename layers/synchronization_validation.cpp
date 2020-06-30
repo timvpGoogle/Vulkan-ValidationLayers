@@ -728,11 +728,11 @@ bool AccessContext::ValidateLoadOperation(const SyncValidator &sync_state, const
                 if (transition_hazard) {
                     // Hazard vs. ILT
                     auto load_op_string = string_VkAttachmentLoadOp(checked_stencil ? ci.stencilLoadOp : ci.loadOp);
-                    skip |= sync_state.LogError(rp_state.renderPass, string_SyncHazardVUID(hazard.hazard),
-                                                "%s: Hazard %s vs. layout transition in subpass %" PRIu32 " for attachment %" PRIu32
-                                                " aspect %s during load with loadOp %s. Prior access %s.",
-                                                func_name, string_SyncHazard(transition_hazard), subpass, i, aspect, load_op_string,
-                                                string_UsageTag(hazard).c_str());
+                    skip |=
+                        sync_state.LogError(rp_state.renderPass, string_SyncHazardVUID(hazard.hazard),
+                                            "%s: Hazard %s vs. layout transition in subpass %" PRIu32 " for attachment %" PRIu32
+                                            " aspect %s during load with loadOp %s",
+                                            func_name, string_SyncHazard(transition_hazard), subpass, i, aspect, load_op_string);
                 }
             } else {
                 auto hazard_range = view.normalized_subresource_range;
