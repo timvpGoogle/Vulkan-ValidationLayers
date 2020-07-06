@@ -3,6 +3,7 @@
 # Copyright 2017 The Glslang Authors. All rights reserved.
 # Copyright (c) 2018 Valve Corporation
 # Copyright (c) 2018 LunarG, Inc.
+# Copyright (c) 2020 LunarG, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -342,9 +343,27 @@ class GoodRepo(object):
         if self.build_platforms == [] or platform.system().lower() in self.build_platforms:
             self.on_build_platform = True
 
-    def Clone(self):
+    def Clone(self, retries=10, retry_seconds=60):
         distutils.dir_util.mkpath(self.repo_dir)
-        command_output(['git', 'clone', self.url, '.'], self.repo_dir)
+        for retry in range(retries):
+            try:
+                command_output(['git', 'clone', self.url, '.'], self.repo_dir)
+                # If we get here, we didn't raise an error
+                break
+            except RuntimeError as e:
+                print("Error cloning on iteration {}/{}: {}".format(retry + 1, retries, e))
+                if retry + 1 < retries:
+                    if retry_seconds > 0:
+                        print("Waiting {} seconds before trying again...".format(retry_seconds))
+                        time.sleep(retry_seconds)
+                    if os.path.isdir(self.repo_dir):
+                        print("Removing old tree {}...".format(self.repo_dir))
+                        shutil.rmtree(self.repo_dir, onerror=on_rm_error)
+                    continue
+
+                # If we get here, we've exhausted our retries.
+                print("Failed to clone {} on all retries.")
+                raise e
 
     def Fetch(self):
         command_output(['git', 'fetch', 'origin'], self.repo_dir)
