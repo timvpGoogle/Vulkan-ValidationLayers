@@ -344,29 +344,45 @@ class GoodRepo(object):
             self.on_build_platform = True
 
     def Clone(self, retries=10, retry_seconds=60):
+        print('Cloning {n} into {d}'.format(n=self.name, d=self.repo_dir))
         distutils.dir_util.mkpath(self.repo_dir)
         for retry in range(retries):
             try:
                 command_output(['git', 'clone', self.url, '.'], self.repo_dir)
                 # If we get here, we didn't raise an error
-                break
+                return
             except RuntimeError as e:
                 print("Error cloning on iteration {}/{}: {}".format(retry + 1, retries, e))
                 if retry + 1 < retries:
                     if retry_seconds > 0:
-                        print("Waiting {} seconds before trying again...".format(retry_seconds))
+                        print("Waiting {} seconds before trying again".format(retry_seconds))
                         time.sleep(retry_seconds)
                     if os.path.isdir(self.repo_dir):
-                        print("Removing old tree {}...".format(self.repo_dir))
+                        print("Removing old tree {}".format(self.repo_dir))
                         shutil.rmtree(self.repo_dir, onerror=on_rm_error)
                     continue
 
                 # If we get here, we've exhausted our retries.
-                print("Failed to clone {} on all retries.")
+                print("Failed to clone {} on all retries.".format(self.url))
                 raise e
 
-    def Fetch(self):
-        command_output(['git', 'fetch', 'origin'], self.repo_dir)
+    def Fetch(self, retries=10, retry_seconds=60):
+        for retry in range(retries):
+            try:
+                command_output(['git', 'fetch', 'origin'], self.repo_dir)
+                # if we get here, we didn't raise an error, and we're done
+                return
+            except RuntimeError as e:
+                print("Error fetching on iteration {}/{}: {}".format(retry + 1, retries, e))
+                if retry + 1 < retries:
+                    if retry_seconds > 0:
+                        print("Waiting {} seconds before trying again".format(retry_seconds))
+                        time.sleep(retry_seconds)
+                    continue
+
+                # If we get here, we've exhausted our retries.
+                print("Failed to fetch {} on all retries.".format(self.url))
+                raise e
 
     def Checkout(self):
         print('Checking out {n} in {d}'.format(n=self.name, d=self.repo_dir))
