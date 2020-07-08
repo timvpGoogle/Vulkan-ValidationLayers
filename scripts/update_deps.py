@@ -252,6 +252,7 @@ import multiprocessing
 import shlex
 import shutil
 import stat
+import time
 
 KNOWN_GOOD_FILE_NAME = 'known_good.json'
 
