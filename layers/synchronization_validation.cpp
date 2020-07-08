@@ -704,7 +704,6 @@ bool AccessContext::ValidateLoadOperation(const SyncValidator &sync_state, const
             const SyncStageAccessIndex stencil_load_index = has_stencil ? DepthStencilLoadUsage(ci.stencilLoadOp) : load_index;
             const SyncStageAccessFlags stencil_mask = has_stencil ? SyncStageAccess::Flags(stencil_load_index) : 0U;
 
-            HazardResult hazard;
             const char *aspect = nullptr;
             if (is_transition) {
                 // For transition w
@@ -729,12 +728,13 @@ bool AccessContext::ValidateLoadOperation(const SyncValidator &sync_state, const
                     // Hazard vs. ILT
                     auto load_op_string = string_VkAttachmentLoadOp(checked_stencil ? ci.stencilLoadOp : ci.loadOp);
                     skip |=
-                        sync_state.LogError(rp_state.renderPass, string_SyncHazardVUID(hazard.hazard),
+                        sync_state.LogError(rp_state.renderPass, string_SyncHazardVUID(transition_hazard),
                                             "%s: Hazard %s vs. layout transition in subpass %" PRIu32 " for attachment %" PRIu32
                                             " aspect %s during load with loadOp %s",
                                             func_name, string_SyncHazard(transition_hazard), subpass, i, aspect, load_op_string);
                 }
             } else {
+                HazardResult hazard;
                 auto hazard_range = view.normalized_subresource_range;
                 bool checked_stencil = false;
                 if (is_color) {
