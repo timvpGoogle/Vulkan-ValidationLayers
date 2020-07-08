@@ -13044,73 +13044,72 @@ TEST_F(VkSyncValTest, SyncBeginRenderPass) {
     const VkAttachmentDescription attachmentDescriptions[] = {
         // Result attachment
         {
-            (VkAttachmentDescriptionFlags)0,   // VkAttachmentDescriptionFlags	flags
-            VK_FORMAT_R8G8B8A8_UNORM,          // VkFormat						format
-            VK_SAMPLE_COUNT_1_BIT,             // VkSampleCountFlagBits		samples
-            VK_ATTACHMENT_LOAD_OP_CLEAR,       // VkAttachmentLoadOp			loadOp
-            VK_ATTACHMENT_STORE_OP_STORE,      // VkAttachmentStoreOp			storeOp
-            VK_ATTACHMENT_LOAD_OP_DONT_CARE,   // VkAttachmentLoadOp			stencilLoadOp
-            VK_ATTACHMENT_STORE_OP_DONT_CARE,  // VkAttachmentStoreOp			stencilStoreOp
-            VK_IMAGE_LAYOUT_UNDEFINED,         // VkImageLayout				initialLayout   Fail
-            // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,  // VkImageLayout	initialLayout   Pass
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL  // VkImageLayout				finalLayout
+            (VkAttachmentDescriptionFlags)0,          // VkAttachmentDescriptionFlags flags
+            VK_FORMAT_R8G8B8A8_UNORM,                 // VkFormat                     format
+            VK_SAMPLE_COUNT_1_BIT,                    // VkSampleCountFlagBits        samples
+            VK_ATTACHMENT_LOAD_OP_CLEAR,              // VkAttachmentLoadOp           loadOp
+            VK_ATTACHMENT_STORE_OP_STORE,             // VkAttachmentStoreOp          storeOp
+            VK_ATTACHMENT_LOAD_OP_DONT_CARE,          // VkAttachmentLoadOp           stencilLoadOp
+            VK_ATTACHMENT_STORE_OP_DONT_CARE,         // VkAttachmentStoreOp          stencilStoreOp
+            VK_IMAGE_LAYOUT_UNDEFINED,                // VkImageLayout                initialLayout
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL  // VkImageLayout                finalLayout
         },
         // Input attachment
         {
-            (VkAttachmentDescriptionFlags)0,           // VkAttachmentDescriptionFlags	flags
-            VK_FORMAT_R8G8B8A8_UNORM,                  // VkFormat						format
-            VK_SAMPLE_COUNT_1_BIT,                     // VkSampleCountFlagBits		samples
-            VK_ATTACHMENT_LOAD_OP_LOAD,                // VkAttachmentLoadOp			loadOp
-            VK_ATTACHMENT_STORE_OP_STORE,              // VkAttachmentStoreOp			storeOp
-            VK_ATTACHMENT_LOAD_OP_DONT_CARE,           // VkAttachmentLoadOp			stencilLoadOp
-            VK_ATTACHMENT_STORE_OP_DONT_CARE,          // VkAttachmentStoreOp			stencilStoreOp
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  // VkImageLayout				initialLayout
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL   // VkImageLayout				finalLayout
+            (VkAttachmentDescriptionFlags)0,           // VkAttachmentDescriptionFlags flags
+            VK_FORMAT_R8G8B8A8_UNORM,                  // VkFormat                     format
+            VK_SAMPLE_COUNT_1_BIT,                     // VkSampleCountFlagBits        samples
+            VK_ATTACHMENT_LOAD_OP_LOAD,                // VkAttachmentLoadOp           loadOp
+            VK_ATTACHMENT_STORE_OP_STORE,              // VkAttachmentStoreOp          storeOp
+            VK_ATTACHMENT_LOAD_OP_DONT_CARE,           // VkAttachmentLoadOp           stencilLoadOp
+            VK_ATTACHMENT_STORE_OP_DONT_CARE,          // VkAttachmentStoreOp          stencilStoreOp
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  // VkImageLayout                initialLayout
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL   // VkImageLayout                finalLayout
         }};
 
     const VkAttachmentReference resultAttachmentRef = {
-        0u,                                       // deUint32			attachment
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL  // VkImageLayout	layout
+        0u,                                       // uint32_t      attachment
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL  // VkImageLayout layout
     };
 
     const VkAttachmentReference inputAttachmentRef = {
-        1u,                                       // deUint32			attachment
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL  // VkImageLayout	layout
+        1u,                                       // uint32_t      attachment
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL  // VkImageLayout layout
     };
 
     const VkSubpassDescription subpassDescription = {
-        (VkSubpassDescriptionFlags)0,     // VkSubpassDescriptionFlags	flags
-        VK_PIPELINE_BIND_POINT_GRAPHICS,  // VkPipelineBindPoint			pipelineBindPoint
-        1u,                               // deUint32						inputAttachmentCount
-        &inputAttachmentRef,              // const VkAttachmentReference*	pInputAttachments
-        1u,                               // deUint32						colorAttachmentCount
-        &resultAttachmentRef,             // const VkAttachmentReference*	pColorAttachments
-        0,                                // const VkAttachmentReference*	pResolveAttachments
-        0,                                // const VkAttachmentReference*	pDepthStencilAttachment
-        0u,                               // deUint32						preserveAttachmentCount
-        0                                 // const deUint32*				pPreserveAttachments
+        (VkSubpassDescriptionFlags)0,     // VkSubpassDescriptionFlags    flags
+        VK_PIPELINE_BIND_POINT_GRAPHICS,  // VkPipelineBindPoint          pipelineBindPoint
+        1u,                               // uint32_t                     inputAttachmentCount
+        &inputAttachmentRef,              // const VkAttachmentReference* pInputAttachments
+        1u,                               // uint32_t                     colorAttachmentCount
+        &resultAttachmentRef,             // const VkAttachmentReference* pColorAttachments
+        0,                                // const VkAttachmentReference* pResolveAttachments
+        0,                                // const VkAttachmentReference* pDepthStencilAttachment
+        0u,                               // uint32_t                     preserveAttachmentCount
+        0                                 // const uint32_t*              pPreserveAttachments
     };
 
     const VkSubpassDependency subpassDependency = {
-        VK_SUBPASS_EXTERNAL,                                              // deUint32				srcSubpass
-        0,                                                                // deUint32				dstSubpass
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,                    // VkPipelineStageFlags	srcStageMask
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,                            // VkPipelineStageFlags	dstStageMask
-        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,                             // VkAccessFlags		srcAccessMask
-        VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_SHADER_READ_BIT,  //	dstAccessMask
-        VK_DEPENDENCY_BY_REGION_BIT                                       // VkDependencyFlags	dependencyFlags
+        VK_SUBPASS_EXTERNAL,                                              // uint32_t             srcSubpass
+        0,                                                                // uint32_t             dstSubpass
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,                    // VkPipelineStageFlags srcStageMask
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,                            // VkPipelineStageFlags dstStageMask
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,                             // VkAccessFlags        srcAccessMask
+        VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_SHADER_READ_BIT,  // VkAccessFlags        dstAccessMask
+        VK_DEPENDENCY_BY_REGION_BIT                                       // VkDependencyFlags    dependencyFlags
     };
 
     const VkRenderPassCreateInfo renderPassInfo = {
-        VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,  // VkStructureTypei					sType
-        0,                                          // const void*						pNext
-        (VkRenderPassCreateFlags)0,                 // VkRenderPassCreateFlags			flags
-        2u,                                         // deUint32 attachmentCount
-        attachmentDescriptions,                     // const VkAttachmentDescription*	pAttachments
-        1u,                                         // deUint32							subpassCount
-        &subpassDescription,                        // const VkSubpassDescription*		pSubpasses
-        1u,                                         // deUint32							dependencyCount
-        &subpassDependency                          // const VkSubpassDependency*		pDependencies
+        VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,  // VkStructureType                sType
+        0,                                          // const void*                    pNext
+        (VkRenderPassCreateFlags)0,                 // VkRenderPassCreateFlags        flags
+        2u,                                         // uint32_t                       attachmentCount
+        attachmentDescriptions,                     // const VkAttachmentDescription* pAttachments
+        1u,                                         // uint32_t                       subpassCount
+        &subpassDescription,                        // const VkSubpassDescription*    pSubpasses
+        1u,                                         // uint32_t                       dependencyCount
+        &subpassDependency                          // const VkSubpassDependency*     pDependencies
     };
     VkRenderPass rp;
     ASSERT_VK_SUCCESS(vk::CreateRenderPass(device(), &renderPassInfo, nullptr, &rp));
@@ -13118,6 +13117,7 @@ TEST_F(VkSyncValTest, SyncBeginRenderPass) {
     VkFramebuffer fb;
     VkFramebufferCreateInfo fbci = {VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO, nullptr, 0, rp, 2, attachments, 32, 32, 1};
     ASSERT_VK_SUCCESS(vk::CreateFramebuffer(device(), &fbci, nullptr, &fb));
+    m_errorMonitor->VerifyNotFound();
 
     m_commandBuffer->begin();
     m_renderPassBeginInfo.renderArea = {{0, 0}, {32, 32}};
@@ -13127,8 +13127,9 @@ TEST_F(VkSyncValTest, SyncBeginRenderPass) {
     // ERROR Message:
     // vkCmdBeginRenderPass: Hazard WRITE_AFTER_WRITE vs. layout transition in subpass 0 for
     // attachment 0 aspect color during load with loadOp VK_ATTACHMENT_LOAD_OP_CLEAR
+    m_errorMonitor->SetDesiredFailureMsg(VK_DEBUG_REPORT_ERROR_BIT_EXT, "SYNC-HAZARD-WRITE_AFTER_WRITE");
     m_commandBuffer->BeginRenderPass(m_renderPassBeginInfo);
-    m_errorMonitor->VerifyNotFound();
+    m_errorMonitor->VerifyFound();
 }
 
 TEST_F(VkSyncValTest, SyncDepthStencilBeginRenderPass) {
@@ -13183,8 +13184,7 @@ TEST_F(VkSyncValTest, SyncDepthStencilBeginRenderPass) {
         VK_ATTACHMENT_STORE_OP_STORE,     // VkAttachmentStoreOp             storeOp
         VK_ATTACHMENT_LOAD_OP_CLEAR,      // VkAttachmentLoadOp              stencilLoadOp
         VK_ATTACHMENT_STORE_OP_STORE,     // VkAttachmentStoreOp             stencilStoreOp
-        VK_IMAGE_LAYOUT_UNDEFINED,        // VkImageLayout				initialLayout   Fail
-        // VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,  // VkImageLayout	initialLayout   Pass
+        VK_IMAGE_LAYOUT_UNDEFINED,        // VkImageLayout                   initialLayout
         VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL  // VkImageLayout                   finalLayout
     };
 
