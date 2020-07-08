@@ -439,7 +439,7 @@ class GoodRepo(object):
         # repo's install dir.
         for d in self.deps:
             dep_commit = [r for r in repos if r.name == d['repo_name']]
-            if len(dep_commit):
+            if len(dep_commit) and dep_commit[0].on_build_platform:
                 cmake_cmd.append('-D{var_name}={install_dir}'.format(
                     var_name=d['var_name'],
                     install_dir=dep_commit[0].install_dir))
